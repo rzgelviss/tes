@@ -1,0 +1,20 @@
+chcp 65001
+pyinstaller -cF websocket_server3.py
+import sys
+sys.setrecursionlimit(1000000)
+from PyInstaller.utils.hooks import collect_data_files, collect_submodules
+datas = collect_data_files("skimage.io._plugins")
+hiddenimports = collect_submodules('skimage.io._plugins')
+face_models = [
+('.\\face_recognition_models\\models\\dlib_face_recognition_resnet_model_v1.dat', './face_recognition_models/models'),
+('.\\face_recognition_models\\models\\mmod_human_face_detector.dat', './face_recognition_models/models'),
+('.\\face_recognition_models\\models\\shape_predictor_5_face_landmarks.dat', './face_recognition_models/models'),
+('.\\face_recognition_models\\models\\shape_predictor_68_face_landmarks.dat', './face_recognition_models/models'),
+]
+a = Analysis(['websocket_server3.py'],
+             pathex=['D:\\PythonProject\\facesearch_by_img'],
+             binaries=face_models,
+             datas=datas,
+             hiddenimports=hiddenimports,)
+把face_recognition_models放到facesearch_by_img目录
+ppyinstaller -cF websocket_server3.spec
