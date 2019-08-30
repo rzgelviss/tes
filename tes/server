@@ -1,0 +1,379 @@
+# -*- coding : utf-8-*-
+
+
+from websocket_server import WebsocketServer
+import json
+import threading
+import time
+import numpy as np
+import face_recognition
+from skimage import io
+import requests
+import os
+import struct
+import base64
+from log_test1 import Logger
+
+# import sys
+# sys.setrecursionlimit(100000)
+# 改变控制台的编码格式为utf-8  解决方法，先在控制台中输入 chcp 65001
+
+server_clients = {}
+
+
+def get_file_list(file_path):
+    dir_list = os.listdir(file_path)
+    if not dir_list:
+        return
+    else:
+        dir_list = sorted(dir_list, key=lambda x: os.path.getctime(os.path.join(file_path, x)))
+        # print(dir_list)
+    return dir_list
+
+
+def get_FileSize(file_path):
+    fsize = os.path.getsize(file_path)
+    fsize = fsize/float(1024 * 1024)
+    return round(fsize, 4)
+
+
+# Called for every client connecting (after handshake)
+def new_client(client, server):
+    # print("New client connected and was given id %d" % client['id'])
+    log.info('New client connected, id: {}, address: {}, port:{}'.format(client['id'], client['address'][0],
+                                                                         client['address'][1]))
+    thread_num = len(threading.enumerate())
+    log.info("线程数量是%d" % thread_num)
+    num = {"thread_num": thread_num}
+    # server.send_message_to_all("Hey all, a new client has joined us")
+    # print(client)
+    # print(server)
+    # print(server.clients)
+    server_clients[client['id']] = client
+    # print(server_clients)
+    for i in range(1):
+        # server.send_message(client, 'adf a sdf')
+        server.send_message(server_clients[client['id']], '客户端id: ' + str(client['id']))
+        server.send_message(server_clients[client['id']], json.dumps(num))
+    file_list = get_file_list(json_file)
+    size = get_FileSize(json_file)
+    if size > 0.01:
+        del_file = './json_file/{}'.format(file_list[0])
+        os.remove(del_file)
+# Called for every client disconnecting
+def client_left(client, server):
+
+    # no = client['id'] - 1
+    # del server_clients[no]
+    del server_clients[client['id']]
+    # print("Client(%d) disconnected" % client['id'])
+    log.info('Client(%s) disconnected' % client)
+    for path in os.listdir(receive_file_path):
+        # print(path)
+        # print(path.split('.')[0].split('_')[1])
+        # print(type(path.split('.')[0].split('_')[1]))
+        # print(client['address'][1])
+        # print(type(client['address'][1]))
+        if path.split('.')[0].split('_')[1] == str(client['address'][1]):
+            # print(path)
+            global receive_path
+            receive_path = os.path.join(receive_file_path, path)
+
+            # print(receive_path)
+            thread2 = MyThread1(path)
+            thread2.start()
+
+
+
+# Called when a client sends a message
+def message_received(client, server, message):
+    # if len(message) > 200:
+    #     message = message[:200]+'..'
+    # print(message)
+    # print(type(message))
+    log.info('接收Client(%d)的信息' % (client['id']))
+    received = json.loads(message)
+    received['url'] = 'http://' + client['address'][0] + ':' + received['port']
+    # received['client'] = client
+    # print(received)
+    # print(type(received))
+    # print(type(received['handler']))
+    if not os.path.exists('./receive_file/{}_{}_{}.json'.format(received['meeting'], client['address'][1], client['address'][0])):
+        with open('./receive_file/{}_{}_{}.json'.format(received['meeting'], client['address'][1], client['address'][0]), 'w') as f:
+            json.dump(received, f)
+    log.info("Client(%d) said: %s" % (client['id'], message))
+
+    thread1 = MyThread(client, message)
+    thread1.start()
+
+    if isinstance(message, str):
+        # print(json.dumps('true'))
+        log.info('接收Client(%s)完成' % (client['id']))
+        server.send_message(client, json.dumps('true'))
+
+
+class MyThread(threading.Thread):
+    def __init__(self, client, message):
+        threading.Thread.__init__(self)
+        self.clientId = client['id']
+        self.client = client
+        try:
+            self.message = json.loads(message)
+        except Exception as e:
+            log.info(e)
+        # print(self.message)
+
+    def run(self):
+        try:
+            if self.message['flage'] == 1:
+                known_img_feature = {"persons": []}  # {人：特征}
+                persons = []
+                for i in range(len(self.message['photos'])):
+
+                    for img_url in self.message['photos'][i].values():
+                        # print(img_url)
+                        known_image = io.imread(img_url)
+                        known_encoding = face_recognition.face_encodings(known_image)
+                        # print(known_encoding)
+                        encoding = []
+                        for j in known_encoding:
+                            j = j.tolist()
+                            j = struct.pack('%sf' % len(j), *j)
+                            j = base64.b64encode(j)
+                            j = j.decode()
+                            encoding.append(j)
+                        for person in self.message['photos'][i].keys():
+                            # print(person)
+                            persons.append(person)
+                            img_feature = {}
+                            img_feature[person] = encoding
+                            known_img_feature['persons'].append(img_feature)
+
+                if self.clientId in server_clients:
+                    known_img_feature = json.dumps(known_img_feature)
+                    log.info('处理Client(%s)完成， 发送结果' % (self.clientId))
+                    # log.info('person_feature:{}'.format(known_img_feature))
+                    log.info('persons：{}'.format(persons)) # 固定的人
+                    server.send_message(server_clients[self.clientId], known_img_feature)
+                    delfile = './receive_file/{}_{}_{}.json'.format(self.message['meeting'], self.client['address'][1], self.client['address'][0])
+                    if os.path.exists(delfile):
+                        os.remove(delfile)
+                    sendover = True
+                    log.info('发送Client(%s)完成' % (self.clientId))
+                    known_img_feature = json.loads(known_img_feature)
+                # known_img_feature['sendover'] = sendover
+                with open('./json_file/{}.json'.format(self.message['meeting']), 'w') as f:
+                    json.dump(known_img_feature, f)
+        except Exception as e:
+            log.info('处理{}数据失败:{}'.format(self.client['id'], e))
+            server.send_message(self.client, json.dumps(str(e)))
+
+        try:
+            if self.message['flage'] == 2:
+                known_img_feature = {"persons": []}
+                results = {}
+                img_known_features = []  # {图片：特征}
+                img_list = []
+                img_id_list = []
+                for i in range(len(self.message['photos'])):
+                    for img_url in self.message['photos'][i].values():
+                        img_list.append(img_url)
+                    for img_id in self.message['photos'][i].keys():
+                        img_id_list.append(img_id)
+                    # print('图片列表：{}'.format(img_list))
+                persons = []
+                for i in range(len(self.message['photos'])):
+                    for img_url in self.message['photos'][i].values():
+                        # print(img_url)
+                        known_image = io.imread(img_url)
+                        known_encoding = face_recognition.face_encodings(known_image)
+                        img_known_features.append(known_encoding)
+                        # 保存所有图片人脸特征
+                        encoding = []
+                        for j in known_encoding:
+                            encoding.append(j.tolist())
+                        for person in self.message['photos'][i].keys():
+                            # print(person)
+                            # persons.append(person)
+                            img_feature = {}
+                            img_feature[person] = encoding
+                            known_img_feature['persons'].append(img_feature)
+                # log.info('client:({})被查询的照片：{}'.format(self.client['id'], persons))
+                if not os.path.exists('./json_file/{}.json'.format(self.message['meeting'])):
+                    with open('./json_file/{}.json'.format(self.message['meeting']), 'w') as f:
+                        json.dump(known_img_feature, f)
+                else:
+                    with open('./json_file/{}_{}.json'.format(self.message['meeting'], len(self.message['photos'])),
+                              'w') as f:
+                        json.dump(known_img_feature, f)
+
+                for k in range(len(self.message['persons'])):
+                    for person, feature in self.message['persons'][k].items():
+                        persons.append(person)
+                        feature = base64.b64decode(feature[0])
+                        feature = struct.unpack('%sf' % int(len(feature) / 4), feature)
+                        uknown_encoding = np.array(feature)
+                        match_img = []
+                        for i in range(len(img_known_features)):
+                            # print(known_img_feature[i])
+                            t2 = time.time()
+                            result = face_recognition.compare_faces(img_known_features[i], uknown_encoding, 0.5)
+                            # print('对比一张图片时间： {}'.format(time.time() - t2))
+                            # print(result)
+                            for j in result:
+                                if j:
+                                    match_img.append(img_id_list[i])
+                                    # img = cv.imread(path)
+                                    # cv.imshow('tes', img)
+                                    # cv.waitKey(100)
+                        match_img = list(set(match_img))
+                        results[person] = match_img
+                log.info('client:({})要查询的人：{}'.format(self.client['id'], persons))
+                if self.clientId in server_clients:
+                    log.info('client:({})results:{}'.format(self.clientId, results))
+                    results = json.dumps(results)
+                    log.info('处理Client(%s)完成， 发送结果' % (self.clientId))
+                    server.send_message(server_clients[self.clientId], results)
+                    log.info('发送Client(%s)完成' % (self.clientId))
+                    delfile = './receive_file/{}_{}_{}.json'.format(self.message['meeting'], self.client['address'][1], self.client['address'][0])
+                    if os.path.exists(delfile):
+                        os.remove(delfile)
+        except Exception as e:
+            log.info('处理{}数据失败:{}'.format(self.client['id'], e))
+            server.send_message(self.client, json.dumps(str(e)))
+
+
+class MyThread1(threading.Thread):
+    def __init__(self, path):
+        threading.Thread.__init__(self)
+        self.path = path
+    # lock = threading.RLock()
+    def run(self):
+        # MyThread1.lock.acquire()
+        # print(path)
+
+        with open(receive_path, 'r') as f:
+            message = json.load(f)
+            url = message['url']
+
+            try:
+                if message['flage'] == 1:
+                    known_img_feature = {'persons': []}
+                    persons = []
+                    for i in range(len(message['photos'])):
+                        for img_url in message['photos'][i].values():
+                            known_image = io.imread(img_url)
+                            known_encoding = face_recognition.face_encodings(known_image)
+                            encoding = []
+                            for j in known_encoding:
+                                j = j.tolist()
+                                j = struct.pack('%sf' % len(j), *j)
+                                j = base64.b64encode(j)
+                                j = j.decode()
+                                encoding.append(j)
+                            for person in message['photos'][i].keys():
+                                persons.append(person)
+                                img_feature = {}
+                                img_feature[person] = encoding
+                                known_img_feature['persons'].append(img_feature)
+                    # with open('./json_file/{}.json'.format(message['meeting']), 'w') as f:
+                    #     json.dump(known_img_feature, f)  # 保存
+                    known_img_feature = json.dumps(known_img_feature)  # 转json str
+                    log.info('{}_{}处理完成，发送结果'.format(self.path, url))  # 文件中给定IP
+                    r = requests.post(url, data=known_img_feature)
+                    # log.info(r.text)
+                    log.info('{}_{}发送完成'.format(self.path, url))
+                    sendover = True
+                    known_img_feature = json.loads(known_img_feature)
+                    # known_img_feature['sendover'] = sendover
+                    with open('./json_file/{}.json'.format(message['meeting']), 'w') as f:
+                        json.dump(known_img_feature, f)
+            except Exception as e:
+                log.info('处理{}_{}数据失败：{}'.format(self.path, url, e))
+            try:
+                if message['flage'] == 2:
+                    known_img_feature = {'persons': []}
+                    results = {}
+                    img_known_features = []
+                    img_list = []
+                    img_id_list = []
+                    for i in range(len(message['photos'])):
+                        for img_url in message['photos'][i].values():
+                            img_list.append(img_url)
+                        for img_id in message['photos'][i].keys():
+                            img_id_list.append(img_id)
+                    persons = []
+                    for i in range(len(message['photos'])):
+                        for img_url in message['photos'][i].values():
+                            known_image = io.imread(img_url)
+                            known_encoding = face_recognition.face_encodings(known_image)
+                            img_known_features.append(known_encoding)
+                            encoding = []
+                            for j in known_encoding:
+                                encoding.append(j.tolist())
+                            for person in message['photos'][i].keys():
+                                # persons.append(person)
+                                img_feature = {}
+                                img_feature[person] = encoding
+                                known_img_feature['persons'].append(img_feature)
+                    # log.info('{}_{}被查询的照片：{}'.format(self.path, url, persons))
+                    if not os.path.exists('./json_file/{}.json'.format(message['meeting'])):
+                        with open('./json_file/{}.json'.format(message['meeting']), 'w') as f:
+                            json.dump(known_img_feature, f)
+                    for k in range(len(message['persons'])):
+                        for person, feature in message['persons'][k].items():
+                            persons.append(person)
+                            feature = base64.b64decode(feature[0])
+                            feature = struct.unpack('%sf' % int(len(feature) / 4), feature)
+                            uknown_encoding = np.array(feature)
+                            match_img = []
+                            for i in range(len(img_known_features)):
+                                result = face_recognition.compare_faces(img_known_features[i], uknown_encoding, 0.5)
+                                for j in result:
+                                    if j:
+                                        match_img.append(img_id_list[i])
+                            match_img = list(set(match_img))
+                            results[person] = match_img
+                    log.info('{}_{}要查询的人：{}'.format(self.path, url, persons))
+                    log.info('{}_{}:results:{}'.format(self.path, url, results))
+                    log.info('{}_{}处理完成，发送结果'.format(self.path, url))  # 文件中给定IP
+                    results = json.dumps(results)
+                    r = requests.post(url, data=results)
+                    # log.info(r.text)
+                    log.info('{}_{}发送完成'.format(self.path, url))
+            except Exception as e:
+                log.info('处理{}_{}数据失败：{}'.format(self.path, url, e))
+        # MyThread1.lock.release()
+        delfile = './receive_file/{}'.format(self.path)
+        # print(delfile)
+        if os.path.exists(delfile):
+            # print(delfile)
+            os.remove(delfile)
+if __name__ == '__main__':
+    if not os.path.exists('./log'):
+        os.mkdir('./log')
+    if not os.path.exists('./json_file'):
+        os.mkdir('./json_file')
+    if not os.path.exists('./receive_file'):
+        os.mkdir('./receive_file')
+    log = Logger('./log/all.log', level='info', maxBytes=5242880, backCount=3).logger
+    json_file = './json_file'
+    receive_file_path = './receive_file'
+
+    if os.path.isdir(receive_file_path):
+        for path in os.listdir(receive_file_path):
+            # print(path)
+            receive_path = os.path.join(receive_file_path, path)
+
+            # print(receive_path)
+            thread2 = MyThread1(path)
+            thread2.start()
+
+    PORT = 9001
+    server = WebsocketServer(PORT, "0.0.0.0")
+    server.set_fn_new_client(new_client)
+    server.set_fn_client_left(client_left)
+    server.set_fn_message_received(message_received)
+    server.run_forever()
+
+
