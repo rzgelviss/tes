@@ -1,0 +1,72 @@
+#opencv3.4
+sudo apt-get install build-essential cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python3.5-dev python3.5-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+git clone https://github.com/opencv/opencv.git
+cd opencv/
+git checkout 3.4.0
+git clone https://github.com/opencv/opencv_contrib.git
+cd opencv_contrib/
+git checkout 3.4.0
+cd opencv/
+mkdir build
+cd build/
+export PY_NAME=$(python3.5 -c 'from sys import version_info as v; print("python%d.%d" % v[:2])')
+export PY_NUMPY_DIR=$(python3.5 -c 'import os.path, numpy.core; print(os.path.dirname(numpy.core.__file__))')
+ 
+cmake -DCMAKE_BUILD_TYPE=RELEASE \
+-DCMAKE_INSTALL_PREFIX=/usr/local \
+\
+-DPYTHON_DEFAULT_EXECUTABLE=$(which python3.5) \
+-DPYTHON3_EXECUTABLE=$(which python3.5) \
+-DPYTHON3_INCLUDE_DIR=/usr/include/$PY_NAME \
+-DPYTHON3_INCLUDE_DIR2=/usr/include/aarch64-linux-gnu/$PY_NAME \
+-DPYTHON3_LIBRARY=/usr/lib/aarch64-linux-gnu/lib$PY_NAME.so \
+-DPYTHON3_NUMPY_INCLUDE_DIRS=/usr/lib/$PY_NAME/dist-packages/numpy/core/include/ \
+\
+-DBUILD_DOCS=OFF \
+-DBUILD_EXAMPLES=OFF \
+-DBUILD_TESTS=OFF \
+-DBUILD_PERF_TESTS=OFF \
+\
+-DOPENCV_EXTRA_MODULES_PATH=../../opencv_contrib/modules \
+..
+make -j$(nproc)
+sudo make install
+
+
+
+
+
+
+#18.04
+http://mirrors.ustc.edu.cn/ubuntu-ports/
+
+
+
+
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ bionic universe
+  
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ bionic-updates universe
+  
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ bionic multiverse
+  
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ bionic-updates multiverse
+  
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ bionic-backports main restricted universe multiverse
+  
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ bionic-security main restricted
+  
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ bionic-security universe
+  
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ bionic-security multiverse
+
+#16.04
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial main multiverse restricted universe
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial-backports main multiverse restricted universe
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial-proposed main multiverse restricted universe
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial-security main multiverse restricted universe
+deb http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial-updates main multiverse restricted universe
+deb-src http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial main multiverse restricted universe
+deb-src http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial-backports main multiverse restricted universe
+deb-src http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial-proposed main multiverse restricted universe
+deb-src http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial-security main multiverse restricted universe
+deb-src http://mirrors.ustc.edu.cn/ubuntu-ports/ xenial-updates main multiverse restricted universe

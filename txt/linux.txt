@@ -1,0 +1,45 @@
+﻿查看包版本
+apt-get install pkg-config
+pkg-config --modversion package
+python3 
+import cv2
+cv2.__version__
+
+2804688
+
+g++ -g -Wall -std=c++11 main.cpp
+
+除了g++ , gcc 也可以类似方法支持C11
+
+gcc -g -Wall -std=c11 main.cpp
+
+apt-get安装目录和安装路径：
+apt-get 下载后，软件所在路径是：/var/cache/apt/archives
+ubuntu 默认的PATH为
+PATH=/home/brightman/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:
+/usr/bin:/sbin:/bin:/usr/games
+apt-get install安装目录是包的维护者确定的，不是用户
+$ dpkg -L packagename
+dpkg -L +软件包的名字，可以知道这个软件包包含了哪些文件
+系统安装软件一般在/usr/share，可执行的文件在/usr/bin，配置文件可能安装到了/etc下等。
+文档一般在 /usr/share
+可执行文件 /usr/bin
+配置文件 /etc
+lib文件 /usr/lib
+
+ifconfig 无 ip
+sudo /sbin/dhclient
+远程tensorboard
+1. 内网连接 
+打开本地命令行，输入：ssh -L 16006:127.0.0.1:6006 linch@192.168.1.238，其中，linch为服务器登录用户名，192.168.1.238为远程服务器地址，可以用ifconfig查询
+
+在远程服务器运行：tensorboard -logdir=./log/ -port=6006
+
+在本地浏览器输入：127.0.0.1:16006
+
+2.外网连接 
+打开本地命令行，输入：ssh -p 12580 -L 16006:127.0.0.1:6006 linch@118.31.62.7，其中12580为远程连接端口
+
+在远程服务器运行：tensorboard -logdir=./log/ -port=6006
+
+在本地浏览器输入：127.0.0.1:16006

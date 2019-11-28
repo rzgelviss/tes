@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="Encoding" addBOMForNewFiles="with NO BOM" />
+  <component name="Encoding" addBOMForNewFiles="with NO BOM">
+    <file url="file://$PROJECT_DIR$/../SSD-Tensorflow-master/voc_2007_train_000.tfrecord" charset="ISO-8859-1" />
+    <file url="file://$PROJECT_DIR$/../facesearch_by_img - 副本/readme_server.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/../facesearch_by_img/server_deploy.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/txt/gitlab.txt" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/../tmps/PyramidBox-master/eval/eval_tools/ground_truth/wider_easy_val.mat" charset="ISO-8859-1" />
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
 </project>

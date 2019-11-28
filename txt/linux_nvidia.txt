@@ -1,0 +1,247 @@
+﻿编辑/etc/sudoers
+找到Defaults env_reset, 将其改为Defaults !env_reset
+不对环境变量进行重置
+编辑~/.bashrc
+在文件内最后追加：
+alias sudo='sudo env PATH=$PATH'
+source ~/.bashrc
+
+
+指定用conda的pip
+sudo /home/twc1/anaconda3/bin/pip install tensorflow-gpu
+
+使用“ctrl+alt+F1”命令进入命令行界面，显示”input user name:”。
+* 使用“sudo service lightdm stop”关闭图形界面之后黑屏，使用“ctrl+alt+F1”进入命令行界面。
+1）打开终端，先删除旧的驱动：
+
+sudo apt-get purge nvidia*
+2）禁用自带的 nouveau nvidia驱动
+
+创建一个文件通过命令 sudo vim /etc/modprobe.d/blacklist-nouveau.conf
+
+并添加如下内容：
+
+blacklist nouveau
+options nouveau modeset=0
+
+再更新一下
+
+sudo update-initramfs -u
+
+修改后需要重启系统。确认下Nouveau是已经被你干掉，使用命令： lsmod | grep nouveau
+
+3）重启系统至init 3（文本模式），也可先进入图形桌面再运行init 3进入文本模式，再安装下载的驱动就无问题，
+
+首先我们需要结束x-window的服务，否则驱动将无法正常安装
+
+关闭X-Window，很简单：sudo service lightdm stop，然后切换tty1控制台：Ctrl+Alt+F1即可
+
+4）接下来就是最关键的一步了：sudo./NVIDIA.run开始安装，安装过程比较快，根据提示选择即可最后安装完毕后，重新启动X-Window：sudo service lightdm start，然后Ctrl+Alt+F7进入图形界面；
+最后测试一下是否安装成功
+
+nvidia-smi
+
+nvidia-settings
+
+
+1. gcc version 5.4 Lucky,No need to downgrade!
+
+2. 下载 CUDA toolkit 10.0?
+
+https://developer.nvidia.com/cuda-10.0-download-archive?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=1604&target_type=runfilelocal
+
+3. 停止?lightdm服务， 就是把图形界面给关了?
+
+service lightdm stop # turn off the lightdm service
+4. 安装下载的CUDA包（内含显卡驱动）?
+
+sudo sh cuda_10.0.130_410.48_linux.run
+5. 安装成功以后记得更新路径设置， 我是更新的~/.bashrc这个文件.
+
+Please make sure that
+
+PATH includes /usr/local/cuda-10.0/bin
+LD_LIBRARY_PATH includes /usr/local/cuda-10.0/lib64
+? ? 这里记一下，CUDA安装完以后会告诉你将来想删除CUDA怎么删：
+
+　To uninstall the CUDA Toolkit, run the uninstall script in /usr/local/cuda-10.0/bin To uninstall the NVIDIA Driver, run nvidia-uninstall
+
+６.　登陆进NVIDIA developer 网站, 下载?cudnn7.5.1 for CUDA 10.0
+
+https://developer.nvidia.com/rdp/cudnn-download#a-collapse751-10
+
+7. 解压缩然后复制
+
+tar -xvzf cudnn-10.0-linux-x64-v7.5.1.10.tgz 
+sudo cp cuda/include/cudnn.h /usr/local/cuda/include # 复制到 include 中 
+sudo cp cuda/lib64/libcudnn* /usr/local/cuda/lib64 # 复制到 lib64 中 
+sudo chmod a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn* # 将头文件复制进去
+8. 更新路径
+
+Make sure:
+
+LD_LIBRARY_PATH includes /usr/local/cuda/extras/CUPTI/lib64
+9. 如果是编辑?~/.bashrc文件来更新路径的，记得最后source一下
+
+source ~/.bashrc
+10. 安装?Anaconda3, 很简单，目前最新的是支持python 3.7?
+
+下载地址：
+
+https://www.anaconda.com/distribution/#download-section
+
+sudo ./Anaconda3-xxxxxxxx-Linux-x86_64.sh
+版本号细节记不得了， 用xxxxxxxxx代替。
+
+最后会询问是否把anaconda的bin添加到用户的环境变量中，选择yes.
+
+记得：
+
+source ~/.bashrc
+
+3、环境变量配置
+
+打开~/.bashrc文件：
+
+sudo gedit ~/.bashrc
+将以下内容写入到~/.bashrc尾部：
+
+export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+使该配置生效：一定要执行啊 ,如果同时打开多个终端,执行过后,重新打开,否则后面的错误也是不断的.
+
+source ~/.bashrc
+在/etc/profile文件中添加CUDA环境变量：
+
+sudo gedit /etc/profile
+打开文档都在文档结尾加上下面两句：
+
+PATH=/usr/local/cuda/bin:$PATH  
+export PATH
+保存后, 执行下列命令, 使环境变量立即生效：
+
+source /etc/profile
+同时添加lib库路径，在 /etc/ld.so.conf.d/新建文件 cuda.conf
+sudo gedit /etc/ld.so.conf.d/cuda.conf
+在文中加入下面内容：
+/usr/local/cuda/lib64
+执行下列命令使之立刻生效：
+
+sudo ldconfig
+
+
+nvcc -V 查看cuda 版本
+
+
+
+
+
+11. 安装tensorflow-gpu, 这里需要注意一下python版本
+
+创建虚拟环境：
+使用 conda create -n your_env_name python=X.X（2.7、3.6等），anaconda 命令创建python版本为X.X、名字为your_env_name的虚拟环境。your_env_name文件可以在Anaconda安装目录envs文件下找到。 指定python版本为2.7，注意至少需要指定python版本或者要安装的包， 在不指定python版本时，自动安装最新python版本。
+
+conda create -n env_name python=2.7
+
+# 同时安装必要的包
+
+conda create -n env_name numpy matplotlib python=2.7
+
+激活虚拟环境：
+使用如下命令即可激活创建的虚拟环境
+
+Linux:  source activate your_env_name(虚拟环境名称)
+
+Windows: activate your_env_name(虚拟环境名称)
+
+ 此时使用python --version可以检查当前python版本是否为想要的（即虚拟环境的python版本）。
+
+退出虚拟环境：
+使用如下命令即可退出创建的虚拟环境
+
+Linux:  source deactivate your_env_name(虚拟环境名称)
+
+Windows:deactivate env_name，也可以使用`activate root`切回root环境
+
+删除虚拟环境：
+删除环境：
+使用命令conda remove -n your_env_name(虚拟环境名称) --all， 即可删除。
+
+删除虚拟环境中的包：
+使用命令conda remove --name $your_env_name  $package_name（包名） 即可。
+
+conda常用命令
+conda list：查看安装了哪些包。
+conda install package_name(包名)：安装包
+conda env list 或 conda info -e：查看当前存在哪些虚拟环境
+conda update conda：检查更新当前conda
+
+
+创建tensorflow环境：
+
+conda create -n tensorflow python=3.5
+这里需要指定python版本是3.5, 我自己之前没有指定，后来在装tensorflow-gpu的时候就遇到报错：
+
+ERROR: Could not find a version that satisfies the requirement heras (from versions: none)
+ERROR: No matching distribution found for heras
+ 
+创建以后激活tensorflow环境，新版本不需要使用source activate命令了，直接使用：
+
+conda activate tensorflow
+进入环境以后， 安装tensorflow-gpu 和 keras
+
+pip install tensorflow-gpu keras
+验证是否成功：
+
+python -c "import keras"
+如果出现：
+
+Using TensorFlow backend.
+
+https://pytorch.org/
+conda install pytorch torchvision cudatoolkit = 10.0 -c pytorch
+pip3 install torch torchvision
+
+
+https://www.lfd.uci.edu/~gohlke/pythonlibs/#opencv
+$sudo unlink /usr/bin/python
+$sudo ln -s /usr/bin/python3.6 /usr/bin/python  <--注意，这里 Python 3 环境的路径以及版本一定要正确
+
+
+
+由于系统原生python3.6与anaconda中的python3.6中都有pip包，所以在安装时经常发生冲突，由于本人更习惯用anaconda来管理python相关的包，试图修改pip指向anaconda，就可以用pip install安装到anaconda的库中。
+
+查看pip现有路径指向
+fff@fff-ThinkPad-Edge-E430:~$ pip -V
+pip 10.0.1 from /home/fff/anaconda3/lib/python3.6/site-packages/pip (python 3.6)
+fff@fff-ThinkPad-Edge-E430:~$ pip3 -V
+pip 10.0.1 from /home/fff/anaconda3/lib/python3.6/site-packages/pip (python 3.6)
+1
+2
+3
+4
+pip位置修改
+#打开bash文件修改
+sudo gedit ~/.bashrc
+#在最后一行添加如下命令：
+alias pip=/home/horsetif/anaconda3/bin/pip
+alias pip3=/home/horsetif/anaconda3/bin/pip
+#更新bash文件
+source ~/.bashrc
+1
+2
+3
+4
+5
+6
+7
+最后按照1中指令查看修改结果
+3. sudo pip位置修改
+
+#修改etc目录
+sudo gedit /etc/profile
+#在最后一行添加如下命令：
+alias pip=/home/horsetif/anaconda3/bin/pip
+alias pip3=/home/horsetif/anaconda3/bin/pip
+#保存退出后，使用如下更新命令
+source /etc/profile

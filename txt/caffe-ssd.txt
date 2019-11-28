@@ -1,0 +1,59 @@
+cp Makefile.config.example Makefile.config
+# Adjust Makefile.config (for example, if using Anaconda Python, or if cuDNN is desired)
+make all
+make test
+make runtest
+
+
+1.
+lmdb.h: No such file or directory
+compilation terminated.
+sudo apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev
+2.
+hdf5.h: No such file or directory compilation terminated
+修改  Makefile.config  文件
+添加/usr/include/hdf5/serial/ 到 INCLUDE_DIRS后
+修改  Makefile  文件
+把 hdf5_hl 和hdf5修改为hdf5_serial_hl 和 hdf5_serial。
+3.
+/usr/bin/ld: cannot find -lcblas
+/usr/bin/ld: cannot find -latlas
+collect2: error: ld returned 1 exit status
+BLAS的Atlas改为Open
+4.
+1. Makefile.config中pkg-config --modversion opencv取消注释（亲测可用）
+2. Makefile.config中OPENCV_VERSION := 3取消注释（亲测可用）
+3. Makefile.config中找到LIBRARIES（在PYTHON_LIBRARIES := boost_python python2.7 前一行）并修改为：
+
+LIBRARIES += glog gflags protobuf leveldb snappy \
+             lmdb boost_system hdf5_hl hdf5 m \ 
+             opencv_core opencv_highgui opencv_imgproc opencv_imgcodecs
+
+
+5.
+>>> import caffe
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/home/jcole/Git/caffe/python/caffe/__init__.py", line 1, in <module>
+    from .pycaffe import Net, SGDSolver, NesterovSolver, AdaGradSolver, RMSPropSolver, AdaDeltaSolver, AdamSolver, NCCL, Timer
+  File "/home/jcole/Git/caffe/python/caffe/pycaffe.py", line 13, in <module>
+    from ._caffe import Net, SGDSolver, NesterovSolver, AdaGradSolver, \
+ImportError: /home/jcole/Git/caffe/python/caffe/_caffe.so: undefined symbol: _ZN5boost6python6detail11init_moduleER11PyModuleDefPFvvE
+Google该错误，发现原因是boost_python的版本不匹配，默认python版本为3.5，而boost_python为2.7。
+解决方法：
+先在系统的/usr/lib/x86_64-linux-gnu/路径下查找boost_python文件的版本是否与python版本匹配，我的电脑中文件名为：
+libboost_python-py35.so.1.58.0
+说明版本为python3.5，匹配。若不匹配则安装对应的boost_python版本。
+接下来打开Caffe文件夹下的Makefile文件，将第208行的
+
+PYTHON_LIBRARIES := boost_python python2.7
+1
+改为
+
+PYTHON_LIBRARIES := boost_python-py35  #py35需要改为你自己的python版本，如py34,py33
+1
+接着重新编译文件：
+
+6.
+sudo ln -s /usr/lib/aarch64linux-gnu/libboost_python-py35.so.1.5x.x /usr/local/lib/libboost_python3.so
+

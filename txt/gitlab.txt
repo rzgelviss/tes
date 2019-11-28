@@ -1,0 +1,110 @@
+要生成新的SSH密钥对，请使用以下命令：
+Windows / GNU / Linux / macOS上的Git Bash：
+ssh-keygen -t rsa -C "your.email@example.com" -b 4096
+复制ssh-key
+type %userprofile%\.ssh\id_rsa.pub | clip
+
+
+命令行指令
+
+Git全球设置
+git config --global user.name“rzg”
+git config --global user.email“renzhenguo@stratosphere.mobi”
+
+创建一个新的存储库
+git clone ssh：// git @ localhost：30001 / reg / my_test.git
+cd my_test
+触摸README.md
+git add README.md
+git commit -m“add README”
+git push -u origin master
+
+现有文件夹
+cd existing_folder
+git init
+git remote add origin ssh：// git @ localhost：30001 / reg / my_test.git
+git add。
+git commit -m“初始提交”
+git push -u origin master
+
+现有的Git存储库
+cd existing_repo
+git remote rename origin old-origin
+git remote add origin ssh：// git @ localhost：30001 / reg / my_test.git 
+git push -u origin --all
+git push -u origin --tags
+
+
+修改后提交 
+git pull 
+git add .
+git commit
+git push -u origin --all
+
+
+一、创建分支
+git clone --recursive https://github.com/pytorch/pytorch
+然后切换到一个已经发行的分支上（例如 v0.3.0）
+git checkout -b v0.3.0
+
+创建分支
+git checkout -b first-branch
+
+改变文件内容
+ehco "Change" >> README.md
+
+提交这个改变
+git commit -a -m  "Readme change"
+
+推送分支到gitlab服务器
+git push -u origin first-branch
+
+切换到master分支
+git checkout master
+
+合并first-branch分支到master分支
+git merge first-branch -no-ff 
+
+推送改变到gitlab上的master
+git push origin master
+
+删除所创建的分支
+git push origin --delete frist-branch
+
+二、执行rebase 前的branch分支合并到master,并同步master状态
+git checkout -b rebase-branch
+ehco "FIle conternt" >> another_file.md
+git add .
+git commit -m "Another commit"
+
+git checkout master
+git push origin rebase-branch -f
+echo "1" >> READEME.md
+git add .
+git commit -m 'Commit in master'
+
+git rebase master
+
+三、挤压提交信息
+git checkou -b squash-branch
+ehco '1' >> README.md
+git add .
+git commit -a -m 'wip1'
+echo '2' >> README.md
+git add .
+git commit -a -m 'wip2'
+git log --oneline
+HEAD~2 代表着我们想挤压最后两个提交。假如你想要挤压最后4个提交，那么使用HEAD~4
+git rebase -i HEAD~2
+git push origin squash-branch
+
+进入我们刻隆的文件夹，可以通过以下命令查看是否是GIT文件夹
+git status
+
+添加这个文件到stage状态。
+git add README.md
+
+
+git log --graph
+
+git branch -a

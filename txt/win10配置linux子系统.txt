@@ -1,0 +1,12 @@
+2. win10配置linux子系统
+  1. 设置 -> 应用和功能 -> 程序和功能 -> 启用或关闭Windows功能 -> 适用于Linux的Windows子系统 -> 勾选
+  2. Miscrosoft Store : 搜索linux并安装
+  3. 使用mobaxterm进入ubuntu子系统
+  4. 设置用户名和密码
+  5. 设置root密码和修改下载源(见上)
+  6. 安装xface桌面： sudo apt-get install --assume-yes xfce4
+  7. 注意需要在mobaxterm -> settings -> X11 -> 将Clipboard设置为disabled
+  8. 在mobaxterm下启动图形化界面：startxfce4
+  9. 安装完zsh后如何设为默认shell？
+    修改~/.bashrc
+    添加 bash -c zsh

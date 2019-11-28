@@ -1,0 +1,4 @@
+1.从AI资料U盘下载并解压GTISDK到开发板
+2.使用的神经网络计算卡是USB Dongle模块请确认SCSI的sg.ko驱动模块存在
+ 内核内置确认modules.builtin中包含“kernel/drivers/scsi/sg.ko”
+cat /lib/modules/$(uname -r)/modules.builtin | grep sg.ko

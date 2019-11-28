@@ -1,0 +1,60 @@
+[Unit] 段: 启动顺序与依赖关系 
+[Service] 段: 启动行为,如何启动，启动类型 
+[Install] 段: 定义如何安装这个配置文件，即怎样做到开机启动
+
+可以看出，/etc/rc.local 的启动顺序是在网络后面，但是显然它少了 Install 段，也就没有定义如何做到开机启动，所以显然这样配置是无效的。 因此我们就需要在后面帮他加上 [Install] 段:
+
+[Install]  
+WantedBy=multi-user.target  
+Alias=rc-local.service
+Bash
+这里需要注意一下，ubuntu-18.04 默认是没有 /etc/rc.local 这个文件的，需要自己创建
+
+sudo touch /etc/rc.local
+Bash
+然后把你需要启动脚本写入 /etc/rc.local ，我们不妨写一些测试的脚本放在里面，以便验证脚本是否生效.
+
+echo "this just a test" > /usr/local/text.log
+Bash
+做完这一步，还需要最后一步 前面我们说 systemd 默认读取 /etc/systemd/system 下的配置文件, 所以还需要在 /etc/systemd/system 目录下创建软链接
+
+ln -s /lib/systemd/system/rc.local.service /etc/systemd/system/
+
+
+#!/bin/sh
+#/etc/init.d/testboot
+### BEGIN INIT INFO
+# Provides:testboot
+# Required-Start:$remote_fs $syslog
+# Required-Stop:$remote_fs $syslog
+# Default-Start:2 3 4 5
+# Default-Stop:0 1 6
+# Short-Description: testboot
+# Description: This service is used to start my applaction
+### END INIT INFO
+case "$1" in
+? ? ?start)
+? ? ?echo "start your app here."
+? ? ?su pi -c "exec ~/testboot.sh"
+? ? ?;;
+? ? ?stop)
+? ? ?echo "stop your app here."
+? ? ?;;
+? ? ?*)
+? ? ?echo "Usage: service testboot start|stop"
+? ? ?exit 1
+? ? ?;;
+esac
+exit 0
+
+方法四：使用systemctl设置服务在/usr/lib/systemd/system/ 下新建文件testboot.service:pi@raspberry:~ $ sudo nano /usr/lib/systemd/system/testboot.service如果目录system不存在，请自行创建：pi@raspberry:~ $ sudo mkdir /usr/lib/systemd/systemtestboot.service文件内容如下：
+[Unit]
+Description=testboot
+[Service]
+Type=oneshot
+ExecStart=/home/pi/testboot.sh
+[Install]
+WantedBy=multi-user.target
+这里直接指定启动文件的路径，无法指定到pi用户执行，所以只能在root用户下执行。设置服务自启动：pi@raspberry:~ $ sudo systemctl enable testboot.service注意：这个方法与方法二类似都是通过服务启动，所以如果两种方法同时使用要注意不能使用同个服务名。
+
+

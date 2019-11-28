@@ -1,0 +1,23 @@
+VNC:
+  1. 安装vnc服务：sudo apt-get install vnc4server
+  2. 安装gnome：sudo apt-get install gnome-panel gnome-settings-daemon metacity nautilus gnome-terminal
+  3. 创建密码：vncpasswd
+  4. 在~/.vnc下创建xstartup文件，内容为
+    #!/bin/sh
+    export XKL_XMODMAP_DISABLE=1
+    unset SESSION_MANAGER
+    unset DBUS_SESSION_BUS_ADDRESS
+
+    gnome-panel &
+    gnmoe-settings-daemon &
+    metacity &
+    nautilus &
+    gnome-terminal &
+    vncconfig &
+    startlxde &
+    /usr/bin/ibus-daemon -d &
+  5. 添加执行权限：chmod +x ~/.vnc/xstartup
+  6. 开启VNC服务：vncserver :1
+  7. 在mobaxterm创建VNC session
+    远程ip地址填ip+vnc服务序号，如：192.168.1.100:1
+    端口号为5900

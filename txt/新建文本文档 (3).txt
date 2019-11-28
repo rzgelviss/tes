@@ -1,0 +1,442 @@
+服务器：47.101.49.144 port:10232 连接人脸识别服务器 172.19.251.164
+root 7Th5N3O&O2jhZHUU
+47.101.49.144 ssh slave2 10.10.0.232
+root
+Twc20180402
+
+
+测试服务器192.168.1.143
+rzg 1
+
+训练服务器
+192.168.1.11控制
+192.168.1.12 设备ip
+ADMIN
+ADMIN
+root twc20180402
+Remote Control -->console redirection 运行launch.jnlp
+
+
+
+http://192.168.1.10:15000/
+1...4Sd
+笔记本
+20180402
+树莓派pc  user ubuntu 
+密码 twc_1nf0
+root 123456
+
+user pi
+密码 1
+root 1
+
+
+pc瑞星威user twc
+密码 1
+rk3288 user ubuntu
+passwd 1
+
+apt-cache search # ------(package 搜索包)
+apt-cache show #------(package 获取包的相关信息，如说明、大小、版本等)
+sudo apt-get install # ------(package 安装包)
+sudo apt-get install # -----(package - - reinstall 重新安装包)
+sudo apt-get -f install # -----(强制安装?#"-f = --fix-missing"当是修复安装吧...)
+sudo apt-get remove #-----(package 删除包)
+sudo apt-get remove - - purge # ------(package 删除包，包括删除配置文件等)
+sudo apt-get autoremove --purge # ----(package 删除包及其依赖的软件包+配置文件等（只对6.10有效，强烈推荐）)
+sudo apt-get update #------更新源
+sudo apt-get upgrade #------更新已安装的包
+sudo apt-get dist-upgrade # ---------升级系统
+sudo apt-get dselect-upgrade #------使用 dselect 升级
+apt-cache depends #-------(package 了解使用依赖)
+apt-cache rdepends # ------(package 了解某个具体的依赖?#当是查看该包被哪些包依赖吧...)
+sudo apt-get build-dep # ------(package 安装相关的编译环境)
+apt-get source #------(package 下载该包的源代码)
+sudo apt-get clean && sudo apt-get autoclean # --------清理下载文件的存档 && 只清理过时的包
+sudo apt-get check #-------检查是否有损坏的依赖
+
+
+查看树莓派系统版本
+uname -a 
+lsb_release -a
+
+sudo apt install screenfetch
+screenfetch
+1.你可以使用 lsof 命令来查看某一端口是否开放。查看端口可以这样来使用，我就以80端口为例：
+lsof -i:80
+如果有显示说明已经开放了，如果没有显示说明没有开放
+2.netstat -aptn执行看看，是否监听在0.0.0.0:3306
+3.
+netstat -nupl (UDP类型的端口)
+netstat -ntpl?(TCP类型的端口)
+例如
+4.telnet ip ?端口号 ? 方式测试远程主机端口是否打开
+
+二、开启指定端口
+
+
+# 开启80端口
+iptables -I INPUT -i eth0 -p tcp --dport 80 -j ACCEPT
+iptables  -I OUTPUT -o eth0 -p tcp --sport 80 -j ACCEPT
+
+
+三、关闭指定端口
+
+
+# 关闭80端口
+sudo iptables -I INPUT -i eth0 -p tcp --dport 80 -j DROP
+sudo iptables -I OUTPUT -o eth0 -p tcp --sport 80 -j DROP
+
+service iptables restart
+
+
+
+pyinstaller
+pyinstaller -F test.py
+pyinstaller -D test.py
+
+pip uninstall enum34
+pip install --upgrade setuptools
+
+
+modbus poll 4.3.4注册码：9876543210ABCDEFGHIJ9813
+
+Modbus Slave version 4.3.1注册码：9876543210ABCDEFGHIJ5295
+
+
+代码
+
+中文名称
+
+寄存器PLC地址
+
+位操作/字操作
+
+操作数量
+
+01 读线圈状态 00001-09999 位操作 单个或多个
+
+02 读离散输入状态 10001-19999 位操作 单个或多个
+
+03 读保持寄存器 40001-49999 字操作 单个或多个
+
+04 读输入寄存器 30001-39999 字操作 单个或多个
+
+05 写单个线圈 00001-09999 位操作 单个
+
+06 写单个保持寄存器 40001-49999 字操作 单个
+
+15 写多个线圈 00001-09999 位操作 多个
+
+16 写多个保持寄存器 40001-49999 字操作 多个
+
+
+对于Modbus TCP而言，主站通常称为Client，从站称为Server；而对于Modbus RTU和Modbus ASCII来说，主站是Master，从站是Slave。
+
+
+树莓派opencv
+sudo apt-get install python3-opencv
+sudo pip3 install opencv-python
+
+更新apt（命令行）
+
+sudo apt-get update
+sudo apt-get upgrade
+
+树莓派1000以下端口管理员模式下运行
+sudo pyhton3 slave.py
+
+2 树莓派SSH服务安装、检测、启动与配置
+
+? ? ? （1）SSH服务安装
+
+? ? ? sudo apt-get install openssh-server
+
+? ? ? （2）检查树莓派SSH服务是否开启
+
+? ? ? ps -e | grep ssh
+
+
+
+? ? ? ssh-agent为客户端，sshd为服务器端服务，只有ssh-agent没有sshd表明SSH服务还没有开启。
+
+? ? ? （3）SSH服务开启
+
+? ? ? sudo /etc/init.d/ssh start
+
+? ? ? （4）SSH服务配置
+
+? ? ? openssh-server配置文件为“/etc/ssh/sshd_config”，可以配置SSH服务的各项参数，如端口配置，默认端口为22，可以配置为其他端口，配置后重启生效。
+
+
+
+3 树莓派SSH服务开机自动启动
+
+? ? ? 在终端命令行中启动SSH服务后，如果系统重启或关机后启动，SSH服务默认是关闭的，依然需要手动启动，为了方便可以设置SSH服务开机自动启动，打开/etc/rc.local文件，在语句exit 0之前加入：
+
+? ? ? /etc/init.d/ssh start
+
+
+1.修改树莓派python程序ip
+2.修改modbuspull connect ip
+
+sudo apt-get install gedit
+
+1.修改中断默认的py 为py3 (改优先级)
+    sudo update-alternatives --install /usr/bin/python python /usr/bin/python2 100
+    sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 150 
+
+ubuntu系统版本
+uname -a
+lsb_release  -a
+未成功
+libjasper-dev
+
+1、将安装文件拷贝至你的目录中，如果是以root身份登录上的，就将软件拷贝至/root中。
+
+#cp xxx.tar.gz /root
+
+ 
+
+2、解压缩。
+
+#tar xvzf xxx.tar.gz
+
+或直接双击解压缩.
+
+ 
+
+3、检查编译。
+
+#./configure
+
+ 
+
+4、检查通过后，将生成用于编译的MakeFile文件。此时，可以开始进行编译。
+
+#make。
+
+ 
+
+5、成功编译后，开始安装。
+
+#make install
+
+ 
+
+6、安装完毕，应清除编译过程中产生的临时文件和配置过程中产生的文件。
+
+#make clean
+
+#make distclean
+
+ +
+
+7、如果要卸载，则执行make uninstall
+
+
+
+    cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D PYTHON3_EXECUTABLE=/usr/bin/python3 -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-3.4.0/modules -D PYTHON_INCLUDE_DIR=/usr/include/python3.6 ..
+
+
+查找包名：apt-cache search libjasper
+
+sudo apt-get install gedit
+gsettings set org.gnome.gedit.preferences.encodings candidate-encodings "['GB18030', 'GB2312', 'GBK', 'UTF-8', 'BIG5', 'CURRENT', 'UTF-16']"
+
+
+问题描述：开发板输入ifconfig命令，仅有lo，即网卡未启动，也没有ip，无法用Xshell远程连接。
+解决方案：
+
+1. 进入/etc/sysconfig/network-scripts 目录，查看是否由网卡驱动？  如果有的话，进行第二步。
+
+2. 输入ifconfig -a命令，可显示eth0和lo。 进行第三步
+
+3. 输入sudo ifconfig eth0 up，启用网卡。此时用ifconfig，只能看到inet6（ipv6?）的地址，没有inet的地址（即Xshell连接输入的ip）。
+
+4. 修改/etc/sysconfig/network-scripts/ifcfg-eth0 文件， 把ONBOOT=no 改为 ONBOOT=yes，但ifconfig的结果没有任何改变。（省略该步骤不知道是否有效）
+
+5. service network-manager restart，重启。出现shutdown eth0 OK，bring up eth0 OK，determine ip for eth0 OK。
+
+6. 输入ifconfig，出现eth0的inet地址。
+service network-manager restart
+
+#sudo /etc/init.d/networking restart
+
+改变更新源：
+
+笔者测试这个默认的网址还是挺快的，网络上有人建议改变更新源为国内的（我没发现快多少，大家根据自己网络选择）：
+
+sudo vi /etc/apt/sources.list
+
+将默认的用#号屏蔽，改为
+
+deb http://mirrors.ustc.edu.cn/raspbian/raspbian/   wheezy main contrib non-free rpi
+
+或者
+
+deb http://mirror.nus.edu.sg/raspbian/raspbian wheezy main contrib non-free rpi
+
+
+
+或者用以下地址代替上面的地址栏
+
+
+
+中山大学
+
+Raspbian http://mirror.sysu.edu.cn/raspbian/raspbian/
+
+中国科学技术大学
+
+Raspbian http://mirrors.ustc.edu.cn/raspbian/raspbian/
+
+清华大学
+
+Raspbian http://mirrors.tuna.tsinghua.edu.cn/raspbian/raspbian/
+
+华中科技大学
+
+Raspbian http://mirrors.hustunique.com/raspbian/raspbian/
+
+Arch linux ARM http://mirrors.hustunique.com/archlinuxarm/
+
+大连东软信息学院源（北方用户）
+Raspbian http://mirrors.neusoft.edu.cn/raspbian/raspbian/
+
+
+
+# lsmod    列出加载的所有驱动，包括网卡驱动
+
+查看网卡驱动版本
+查看模块信息：modifo<module name>  # 其中包含version信息
+
+或 # ethtool-i <device name>
+ethtool -i eht0
+
+问题二：ifconfig之后显示eth0，但是没有显示“inet/地址/广播/掩码/ ”?
+先用sudo dhclient eth0更新IP地址
+
+然后运行sudo ifconfig eth0 up
+
+
+3.reboot
+
+1
+sudo apt-get install ufw
+当然，这是有图形界面的(比较简陋)，在新立得里搜索gufw试试……
+
+使用方法
+1 启用
+
+1
+2
+sudo ufw enable
+sudo ufw default deny
+作用：开启了防火墙并随系统启动同时关闭所有外部对本机的访问（本机访问外部正常）。
+
+2 关闭
+
+1
+sudo ufw disable
+3 查看防火墙状态
+
+1
+sudo ufw status
+4 开启/禁用相应端口或服务举例
+
+1
+sudo ufw allow 80 允许外部访问80端口
+1
+sudo ufw delete allow 80 禁止外部访问80 端口
+1
+sudo ufw allow from 192.168.1.1 允许此IP访问所有的本机端口
+1
+sudo ufw deny smtp 禁止外部访问smtp服务
+1
+sudo ufw delete allow smtp 删除上面建立的某条规则
+1
+ufw deny proto tcp from 10.0.0.0/8 to 192.168.0.1 port 要拒绝所有的流量从TCP的10.0.0.0/8 到端口22的地址192.168.0.1
+
+voc:
+https://pjreddie.com/projects/pascal-voc-dataset-mirror/
+
+
+1. 替换shell：
+    1. sudo apt install zsh git curl fonts-powerline
+    2. sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+    3. chsh -s /bin/zsh   # 设置为默认shell
+    4. 重启或注销生效
+    5. gedit ~/.zshrc     # 配置zsh
+    6. 将原本bashrc的环境变量复制到zshrc中
+    7. 更换主题：
+      1. ls ~/.oh-my-zsh/themes 查看所有主题
+      2. 将ZSH_THEME='robbyrussell'替换为'agnoster'或'jonathan'或者其他
+      3. 个人定制主题：
+        将ZSH_THEME='robbyrussell'替换为'half-life'
+        code ~/.oh-my-zsh/themes/half-life.zsh-theme
+        修改
+          FMT_UNSTAGED="%{$orange%} ?"
+          FMT_STAGED="%{$limegreen%} ?"
+        将最后一行替换为
+          PROMPT=$'%{$purple%}%n%{$reset_color%} in %{$limegreen%}%~%{$reset_color%}$(ruby_prompt_info " with%{$fg[red]%} " v g "%{$reset_color%}")$vcs_info_msg_0_%{$orange%}%{$reset_color%} at %{$hotpink%}%* %{$orange%}?%{$reset_color%} '
+        source ~/.zshrc
+8. 安装插件：
+      1. ls ~/.oh-my-zsh/plugins/
+      2. 将需要的插件填入plugins，如：plugins=(git python)，空格隔开
+      3. 推荐插件： 
+        指令补全： git clone https://github.com/zsh-users/zsh-autosuggestions.git $ZSH_CUSTOM/plugins/zsh-autosuggestions
+        高亮： git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $ZSH_CUSTOM/plugins/zsh-syntax-highlighting
+        code ~/.zshrc
+        将zsh-autosuggestions zsh-syntax-highlighting 填入 plugins
+        终端搜索：将web-search 填入plugins
+    9. 单次切换shell:
+      bash
+      zsh
+
+mysql>set password for root@localhost=password('123');
+tensorflow gpu cuda cudnn版本对应关系
+https://www.tensorflow.org/install/source_windows
+https://github.com/fo40225/tensorflow-windows-wheel
+CUDA下载安装链接：https://developer.nvidia.com/cuda-toolkit-archive 
+cuDNN下载安装链接：https://developer.nvidia.com/rdp/cudnn-archive
+tensorflow-gpu==1.10	 cuda9.0
+
+conda 管理多版本
+conda info --envs
+conda create --name python27 python=2.7
+activate python27
+deactivate python27
+conda remove --name python27 --all
+
+数据库备份
+C:\Users\TWC_IMPORTANT>mysqldump -u root -p wuhu >d:wuhubac.sql
+Enter password: ******
+数据库还原
+C:\Users\TWC_IMPORTANT>mysql -u root -p 123456 wuhu < D:\Ren\wxwj\wuhu\welddb20190509.sql
+ubuntu安装
+https://blog.csdn.net/qq_39478237/article/details/83084515
+rzg
+rzg-viirtual-machine
+rzg
+123456
+
+
+ 可以用touch test.sh #创建test.sh文件
+  vi test.sh #编辑test.sh文件
+  加入内容
+  #！/bin/bash
+   mkdir test
+   保存退出。
+  chmod a+x test.sh #给test.sh可执行权限
+  如test,sh文件在 /home/work文件下
+  执行
+  方法一 本身目录下运行
+  进入 cd /home/workwen文件下
+  执行 ./test.sh
+   命令会在当前目录下创建一个“test”目录。
+  方法二 绝对路劲运行
+  执行 /home/work/test.sh  
+  方法三 本身目录下运行
+  sh test.sh 
+Ubuntu中编译c/c++程序 build-essential
